@@ -2,17 +2,43 @@ var clock = document.getElementById("clock");
 clock.height = window.innerHeight * 0.8;
 clock.width = window.innerWidth;
 var ctx = clock.getContext("2d");
-var radius = clock.height / 2;
-ctx.translate(window.innerWidth / 2, radius);
-radius = radius * 0.90
+var radius = clock.height / 2 * 0.90
 
-setInterval(drawClock, 1000);
+var translateX = window.innerWidth / 2;
+var translateY = clock.height / 2;
+
+ctx.font = radius * 0.15 + "px arial";
+ctx.textBaseline = "middle";
+ctx.textAlign = "center";
+
+function Clean() {
+  ctx.fillStyle = 'antiquewhite';
+  ctx.fillRect(0, 0, clock.width, clock.height);
+}
 
 function drawClock() {
-  // return
+  Clean();
+  drawDigital(ctx);
+  ctx.translate(translateX, translateY);
   drawFace(ctx, radius);
   drawNumbers(ctx, radius);
   drawTime(ctx, radius);
+  ctx.translate(- translateX, - translateY);
+}
+
+function drawDigital(ctx) {
+  var date = new Date();
+  var h = date.getHours(); // 0 - 23
+  var m = date.getMinutes(); // 0 - 59
+
+  h = (h < 10) ? "0" + h : h;
+  m = (m < 10) ? "0" + m : m;
+
+  var time = h + ":" + m
+
+  ctx.fillStyle = 'black';
+  ctx.font = radius * 0.4 + "px arial";
+  ctx.fillText(time, radius / 2, radius / 3);
 }
 
 function drawFace(ctx, radius) {
@@ -36,11 +62,10 @@ function drawFace(ctx, radius) {
 function drawNumbers(ctx, radius) {
   var ang;
   var num;
-  
-  ctx.font = radius * 0.15 + "px arial";
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "center";
 
+  ctx.fillStyle = 'black';
+  ctx.font = radius * 0.15 + "px arial";
+  
   for(num = 1; num < 13; num++){
     ang = num * Math.PI / 6;
     ctx.rotate(ang);
@@ -86,3 +111,4 @@ function drawHand(ctx, pos, length, width) {
 }
 
 drawClock();
+setInterval(drawClock, 1000);

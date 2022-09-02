@@ -8,11 +8,3 @@ body {
   justify-content: center;
   align-content: center;
 }
-
-#header {
-  background-color: grey;
-}
-
-#clock {
-  background-color: antiquewhite;
-}
