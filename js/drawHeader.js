@@ -22,7 +22,7 @@ function GetTimeFloat() {
     // var currentTime =  date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
     var currentTime = 24 * (date.getSeconds() / 60);
 
-    console.log("[time] currentTime: " + currentTime);
+    // console.log("[time] currentTime: " + currentTime);
 
     return currentTime;
 }
@@ -38,7 +38,7 @@ function GetSunPosition() {
 
     var position = (header.width + imageSize) * positionPercent / 100 - imageSize;
 
-    console.log("[sun] imageSize: " + imageSize + ", header.width: " + header.width + ", position: " + position + ",  positionPercent: " + positionPercent)
+    // console.log("[sun] imageSize: " + imageSize + ", header.width: " + header.width + ", position: " + position + ",  positionPercent: " + positionPercent)
 
     return position;
 }
@@ -57,7 +57,7 @@ function GetMoonPosition() {
 
     var position = (header.width + imageSize) * positionPercent / 100 - imageSize;
 
-    console.log("[moon] imageSize: " + imageSize + ", header.width: " + header.width + ", position: " + position + ",  positionPercent: " + positionPercent)
+    // console.log("[moon] imageSize: " + imageSize + ", header.width: " + header.width + ", position: " + position + ",  positionPercent: " + positionPercent)
 
     return position;
 }

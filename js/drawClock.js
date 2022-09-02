@@ -19,11 +19,71 @@ function Clean() {
 function drawClock() {
   Clean();
   drawDigital(ctx);
+  drawDate(ctx);
+  drawWeekDays(ctx);
   ctx.translate(translateX, translateY);
   drawFace(ctx, radius);
   drawNumbers(ctx, radius);
   drawTime(ctx, radius);
   ctx.translate(- translateX, - translateY);
+}
+
+function drawWeekDays(ctx) {
+  var date = new Date();
+  var daysSvk = [
+    "PONDELOK",
+    "UTOROK",
+    "STREDA",
+    "ŠTVRTOK",
+    "PIATOK",
+    "SOBOTA",
+    "NEDELA"
+  ];
+  var daysFin = [
+    "MAANANTAI",
+    "TIISTAI",
+    "KESKIVIIKKO",
+    "TORSTAI",
+    "PERJANTAI",
+    "LAUANTAI",
+    "SUNNUNTAI",
+  ]
+  var daysColors = [
+    "green",
+    "blue",
+    "white",
+    "brown",
+    "yellow",
+    "pink",
+    "red"
+  ]
+  var jsIndex = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    0
+  ]
+
+  ctx.font = radius * 0.1 + "px arial";
+  ctx.textAlign = "left";
+
+  for (let index = 0; index < daysSvk.length; index++) {
+    if ((date.getDay() || 7) == index + 1) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(clock.width - 200 - 5, window.innerHeight * 0.1 + index * 80 - 30, 200, 85);
+      ctx.fillStyle = "antiquewhite";
+      ctx.fillRect(clock.width - 200 - 3, window.innerHeight * 0.1 + index * 80 - 30 + 2, 196, 81);
+    }
+
+    ctx.font = radius * 0.1 + "px arial";
+    ctx.textAlign = "left";
+    ctx.fillStyle = daysColors[index];
+    ctx.fillText(daysSvk[index], clock.width - 200, window.innerHeight * 0.1 + index * 80);
+    ctx.fillText(daysFin[index], clock.width - 200, window.innerHeight * 0.1 + index * 80 + 30);
+  }
 }
 
 function drawDigital(ctx) {
@@ -36,9 +96,26 @@ function drawDigital(ctx) {
 
   var time = h + ":" + m
 
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = "black";
   ctx.font = radius * 0.4 + "px arial";
+  ctx.textAlign = "center";
   ctx.fillText(time, radius / 2, radius / 3);
+}
+
+function drawDate(ctx) {
+  var date = new Date();
+  var m = date.getMonth(); // 0 - 11
+  var d = date.getDate(); // 1 - 31
+
+  d = (d < 10) ? "0" + d : d;
+  m = (m < 10) ? "0" + m : m;
+
+  var date = d + "." + m
+
+  ctx.fillStyle = "black";
+  ctx.font = radius * 0.4 + "px arial";
+  ctx.textAlign = "center";
+  ctx.fillText(date, radius / 2, window.innerHeight - radius * 0.8);
 }
 
 function drawFace(ctx, radius) {
@@ -63,9 +140,10 @@ function drawNumbers(ctx, radius) {
   var ang;
   var num;
 
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = "black";
   ctx.font = radius * 0.15 + "px arial";
-  
+  ctx.textAlign = "center";
+
   for(num = 1; num < 13; num++){
     ang = num * Math.PI / 6;
     ctx.rotate(ang);
