@@ -19,8 +19,8 @@ var imageSize = header.height - 2 * padding;
 
 function GetTimeFloat() {
     var date = new Date();
-    // var currentTime =  date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
-    var currentTime = 24 * (date.getSeconds() / 60);
+    var currentTime =  date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
+    // var currentTime = 24 * (date.getSeconds() / 60);
 
     // console.log("[time] currentTime: " + currentTime);
 
