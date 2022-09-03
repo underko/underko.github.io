@@ -5,6 +5,10 @@ var ctxHeader = header.getContext("2d");
 
 var windUpHour = 6;
 var wakeUpHour = 7;
+
+var napStart = 13;
+var napEnd = 15;
+
 var windDownHour = 19;
 var sleepHour = 20;
 
@@ -93,6 +97,16 @@ function CleanHeader() {
 
     ctxHeader.fillStyle = color;
     ctxHeader.fillRect(0, 0, header.width, header.height);
+    
+    if (color == "lightgreen") {
+        ctxHeader.fillStyle = "darkseagreen";
+        var x = header.width / (sleepHour - wakeUpHour) * (napStart - wakeUpHour);
+        var y = 0;
+        var w = header.width / (sleepHour - wakeUpHour) * (napEnd - napStart);
+        var h = header.height;
+        ctxHeader.fillRect(x, y, w, h);
+        console.log("[rec] x: " + x + ", y: " + y + ", w: " + w + ", h: " + h);
+    }
 }
 
 function DrawHeader() {

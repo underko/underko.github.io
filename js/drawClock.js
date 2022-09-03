@@ -104,7 +104,7 @@ function drawDigital(ctx) {
 
 function drawDate(ctx) {
   var date = new Date();
-  var m = date.getMonth(); // 0 - 11
+  var m = date.getMonth() + 1; // 0 - 11
   var d = date.getDate(); // 1 - 31
 
   d = (d < 10) ? "0" + d : d;
