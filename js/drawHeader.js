@@ -105,7 +105,6 @@ function CleanHeader() {
         var w = header.width / (sleepHour - wakeUpHour) * (napEnd - napStart);
         var h = header.height;
         ctxHeader.fillRect(x, y, w, h);
-        console.log("[rec] x: " + x + ", y: " + y + ", w: " + w + ", h: " + h);
     }
 }
 
