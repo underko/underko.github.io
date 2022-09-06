@@ -110,12 +110,12 @@ function drawDate(ctx) {
   d = (d < 10) ? "0" + d : d;
   m = (m < 10) ? "0" + m : m;
 
-  var date = d + "." + m
+  var date = d + "." + m + "."
 
   ctx.fillStyle = "black";
   ctx.font = radius * 0.4 + "px arial";
   ctx.textAlign = "center";
-  ctx.fillText(date, radius / 2, window.innerHeight - radius * 0.8);
+  ctx.fillText(date, radius / 2 + 20, window.innerHeight - radius * 0.8);
 }
 
 function drawFace(ctx, radius) {
