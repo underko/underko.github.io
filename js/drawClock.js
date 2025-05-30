@@ -23,7 +23,6 @@ function Clean() {
 async function drawClock() {
   Clean();
   drawDigital(ctx);
-  // drawParentalSchedule(ctx);
   await drawWeatherWidget(ctx);
   drawDate(ctx);
   drawWeekDays(ctx);
@@ -183,27 +182,6 @@ function drawTime(ctx, radius){
   drawHand(ctx, second, radius*0.9, radius*0.02);
 }
 
-/*
-function drawParentalSchedule(ctx)
-{
-  var date = new Date();
-  var dayOfYear = Math.floor(
-    (date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24
-  );
-  var dateInt = dayOfYear + date.getFullYear();
-  var b = dateInt % 2 == 0;
-
-  var fatherText = "TATO > " + (b ? "TIMI" : "GABI")
-  var motherText = "ÄITI > " + (b ? "GABI" : "TIMI")
-  
-  ctx.fillStyle = "black";
-  ctx.font = radius * 0.1 + "px arial";
-  ctx.textAlign = "center";
-  ctx.fillText(fatherText, radius / 3 , radius - 15);
-  ctx.fillText(motherText, radius / 3 , radius + 15);
-}
-*/
-
 async function drawWeatherWidget(ctx) {
   const centerX = radius / 3 + 20;
   const iconSize = 128;
@@ -256,13 +234,13 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
   const rainPercentage = data.forecast.forecastday[0].day.daily_chance_of_rain;
   const snowPercentage = data.forecast.forecastday[0].day.daily_chance_of_snow;
   
-  ctx.drawImage(iconImg, centerX - (iconSize / 2), radius - 100, iconSize, iconSize);
+  ctx.drawImage(iconImg, centerX - (iconSize / 2) + 10, radius - 100, iconSize, iconSize);
 
   ctx.fillStyle = "black";
   ctx.font = radius * 0.1 + "px Arial";
   ctx.textAlign = "center";
 
-  ctx.fillText(`${temp.toFixed(1)}°C (${lowTemp.toFixed(1)}°C|${highTemp.toFixed(1)}°C)`, centerX, radius);
+  ctx.fillText(`${temp.toFixed(1)}°C (${lowTemp.toFixed(1)}-${highTemp.toFixed(1)})`, centerX, radius);
   ctx.fillText(`🌧 ${rainPercentage}%, 🌨 ${snowPercentage}%`, centerX, radius + 35);
   ctx.fillText(`😎: ${uvIndex}`, centerX, radius + 70);
   ctx.fillText(`🍃: ${aqi}`, centerX, radius + 105);
