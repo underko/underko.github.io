@@ -254,7 +254,7 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
   const uvIndex = data.current.uv;
   const aqi = data.current.air_quality["us-epa-index"];
 
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.drawImage(iconImg, centerX - iconSize / 2, radius - 100, iconSize, iconSize);
 
   ctx.fillStyle = "black";
