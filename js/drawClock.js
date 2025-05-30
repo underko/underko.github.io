@@ -203,7 +203,7 @@ async function drawWeatherWidget(ctx) {
       const data = await response.json();
 
       const weatherCode = data.current.weather_code.toString();
-      const wmoEntry = wmoCodes?.[weatherCode]?.[isDay];
+      const wmoEntry = wmoCodes.[weatherCode].[isDay];
 
       const iconImg = new Image();
       iconImg.src = wmoEntry.image;
