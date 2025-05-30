@@ -205,7 +205,6 @@ function drawParentalSchedule(ctx)
 */
 
 async function drawWeatherWidget(ctx) {
-  const radius = 150;
   const centerX = radius / 3;
   const iconSize = 48;
 
