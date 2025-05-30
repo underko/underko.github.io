@@ -206,7 +206,7 @@ function drawParentalSchedule(ctx)
 
 async function drawWeatherWidget(ctx) {
   const centerX = radius / 3 + 20;
-  const iconSize = 64;
+  const iconSize = 128;
 
   const now = new Date();
   const currentQuarter = Math.floor(now.getMinutes() / 15); // 0-3
@@ -254,7 +254,7 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
   const aqi = data.current.air_quality["us-epa-index"];
 
   //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.drawImage(iconImg, centerX - iconSize / 2, radius - 100, iconSize, iconSize);
+  ctx.drawImage(iconImg, centerX - (iconSize / 2) - 30, radius - 100, iconSize, iconSize);
 
   ctx.fillStyle = "black";
   ctx.font = radius * 0.1 + "px Arial";
