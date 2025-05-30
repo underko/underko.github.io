@@ -256,7 +256,7 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
 async function loadWmoCodes() {
   if (wmoCodes) return; // Already loaded
   try {
-    const response = await fetch('js/wmo_codes.json');
+    const response = await fetch("https://underko.github.io/js/wmo_codes.json");
     wmoCodes = await response.json();
   } catch (err) {
     console.error("Failed to load wmo_codes.json", err);
