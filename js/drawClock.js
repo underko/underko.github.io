@@ -255,5 +255,5 @@ function drawHand(ctx, pos, length, width) {
   ctx.rotate(-pos);
 }
 
-await drawClock();
+drawClock();
 setInterval(drawClock, 1000);
