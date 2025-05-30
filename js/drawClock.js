@@ -205,8 +205,8 @@ function drawParentalSchedule(ctx)
 */
 
 async function drawWeatherWidget(ctx) {
-  const centerX = radius / 3;
-  const iconSize = 48;
+  const centerX = radius / 3 + 20;
+  const iconSize = 64;
 
   const now = new Date();
   const currentQuarter = Math.floor(now.getMinutes() / 15); // 0-3
@@ -260,10 +260,10 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
   ctx.font = radius * 0.1 + "px Arial";
   ctx.textAlign = "center";
 
-  ctx.fillText(`Temp: ${temp.toFixed(1)}°C`, centerX, radius - 30);
+  ctx.fillText(`Temp: ${temp.toFixed(1)}°C`, centerX, radius - 35);
   ctx.fillText(`High: ${highTemp.toFixed(1)}°C`, centerX, radius);
-  ctx.fillText(`UV Index: ${uvIndex}`, centerX, radius + 30);
-  ctx.fillText(`Air Quality: ${aqi}`, centerX, radius + 60);
+  ctx.fillText(`UV Index: ${uvIndex}`, centerX, radius + 35);
+  ctx.fillText(`Air Quality: ${aqi}`, centerX, radius + 70);
 }
 
 function drawHand(ctx, pos, length, width) {
