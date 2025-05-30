@@ -14,6 +14,7 @@ ctx.textAlign = "center";
 let lastFetchQuarter = null;
 let cachedWeatherData = null;
 let cachedWeatherIcon = null;
+let wmoCodes = null; 
 
 function Clean() {
   ctx.fillStyle = 'antiquewhite';
@@ -186,20 +187,26 @@ async function drawWeatherWidget(ctx) {
   const centerX = radius / 3 + 20;
   const iconSize = 128;
 
+  await loadWmoCodes();
+
   const now = new Date();
   const currentQuarter = Math.floor(now.getMinutes() / 15); // 0-3
   const currentHour = now.getHours();
   const fetchKey = `${currentHour}:${currentQuarter}`;
 
+  const isDay = currentHour >= 8 && currentHour < 20 ? "day" : "night";
+
   // Fetch only if not already fetched in this 15-minute block
   if (fetchKey !== lastFetchQuarter) {
     try {
-      const response = await fetch("https://api.weatherapi.com/v1/forecast.json?key=5aa3837eb41040fa93450449253005&q=Raisio&days=1&aqi=yes&alerts=no");
+      const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=60.4859&longitude=22.1689&daily=temperature_2m_max,uv_index_max,snowfall_sum,rain_sum,weather_code,showers_sum,precipitation_probability_max,precipitation_sum,precipitation_hours,shortwave_radiation_sum,temperature_2m_min&current=temperature_2m,weather_code&forecast_days=1");
       const data = await response.json();
 
-      const iconUrl = "https:" + data.current.condition.icon;
+      const weatherCode = data.current.weather_code.toString();
+      const wmoEntry = wmoCodes?.[weatherCode]?.[isDay];
+
       const iconImg = new Image();
-      iconImg.src = iconUrl;
+      iconImg.src = wmoEntry.image;
 
       iconImg.onload = () => {
         cachedWeatherData = data;
@@ -226,24 +233,34 @@ async function drawWeatherWidget(ctx) {
 }
 
 function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
-  const temp = data.current.temp_c;
-  const lowTemp = data.forecast.forecastday[0].day.mintemp_c;
-  const highTemp = data.forecast.forecastday[0].day.maxtemp_c;
-  const uvIndex = data.current.uv;
-  const aqi = data.current.air_quality["us-epa-index"];
-  const rainPercentage = data.forecast.forecastday[0].day.daily_chance_of_rain;
-  const snowPercentage = data.forecast.forecastday[0].day.daily_chance_of_snow;
+  const temp = data.current.temperature_2m;
+  const lowTemp = data.daily.temperature_2m_min[0];
+  const highTemp = data.daily.temperature_2m_max[0];
+  const uvIndex = data.daily.uv_index_max[0];
+  const aqi = 0;
+  const rainMm = data.daily.rain_sum[0];
+  const snowCm = data.daily.snowfall_sum[0];
   
-  ctx.drawImage(iconImg, centerX - (iconSize / 2) + 10, radius - 100, iconSize, iconSize);
+  ctx.drawImage(iconImg, centerX - (iconSize / 2), radius - 100, iconSize, iconSize);
 
   ctx.fillStyle = "black";
   ctx.font = radius * 0.1 + "px Arial";
   ctx.textAlign = "center";
 
   ctx.fillText(`${temp.toFixed(1)}°C (${lowTemp.toFixed(1)}-${highTemp.toFixed(1)})`, centerX, radius);
-  ctx.fillText(`🌧 ${rainPercentage}%, 🌨 ${snowPercentage}%`, centerX, radius + 35);
+  ctx.fillText(`🌧 ${rainMm}mm, 🌨 ${snowCm}cm`, centerX, radius + 35);
   ctx.fillText(`😎: ${uvIndex}`, centerX, radius + 70);
   ctx.fillText(`🍃: ${aqi}`, centerX, radius + 105);
+}
+
+async function loadWmoCodes() {
+  if (wmoCodes) return; // Already loaded
+  try {
+    const response = await fetch('wmo_codes.json');
+    wmoCodes = await response.json();
+  } catch (err) {
+    console.error("Failed to load wmo_codes.json", err);
+  }
 }
 
 function drawHand(ctx, pos, length, width) {
