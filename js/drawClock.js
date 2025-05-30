@@ -11,6 +11,10 @@ ctx.font = radius * 0.15 + "px arial";
 ctx.textBaseline = "middle";
 ctx.textAlign = "center";
 
+let lastFetchQuarter = null;
+let cachedWeatherData = null;
+let cachedWeatherIcon = null;
+
 function Clean() {
   ctx.fillStyle = 'antiquewhite';
   ctx.fillRect(0, 0, clock.width, clock.height);
