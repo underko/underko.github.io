@@ -16,10 +16,11 @@ function Clean() {
   ctx.fillRect(0, 0, clock.width, clock.height);
 }
 
-function drawClock() {
+async function drawClock() {
   Clean();
   drawDigital(ctx);
-  drawParentalSchedule(ctx);
+  // drawParentalSchedule(ctx);
+  await drawWeatherWidget(ctx);
   drawDate(ctx);
   drawWeekDays(ctx);
   ctx.translate(translateX, translateY);
@@ -178,6 +179,7 @@ function drawTime(ctx, radius){
   drawHand(ctx, second, radius*0.9, radius*0.02);
 }
 
+/*
 function drawParentalSchedule(ctx)
 {
   var date = new Date();
@@ -196,6 +198,51 @@ function drawParentalSchedule(ctx)
   ctx.fillText(fatherText, radius / 3 , radius - 15);
   ctx.fillText(motherText, radius / 3 , radius + 15);
 }
+*/
+
+async function drawWeatherWidget(ctx) {
+  const radius = 150;
+  const centerX = radius / 3;
+  const iconSize = 48;
+
+  const now = new Date();
+  const currentQuarter = Math.floor(now.getMinutes() / 15); // 0-3
+  const currentHour = now.getHours();
+  const fetchKey = `${currentHour}:${currentQuarter}`;
+
+  // Fetch only if not already fetched in this 15-minute block
+  if (fetchKey !== lastFetchQuarter) {
+    try {
+      const response = await fetch("https://api.weatherapi.com/v1/forecast.json?key=5aa3837eb41040fa93450449253005&q=Raisio&days=1&aqi=yes&alerts=no");
+      const data = await response.json();
+
+      const iconUrl = "https:" + data.current.condition.icon;
+      const iconImg = new Image();
+      iconImg.src = iconUrl;
+
+      iconImg.onload = () => {
+        cachedWeatherData = data;
+        cachedWeatherIcon = iconImg;
+        lastFetchQuarter = fetchKey;
+        renderWeather(ctx, data, iconImg, centerX, radius, iconSize);
+      };
+
+      return; // Avoid rendering before image loads
+    } catch (error) {
+      console.error("Weather fetch failed:", error);
+      ctx.fillStyle = "red";
+      ctx.font = radius * 0.1 + "px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Weather load error", radius / 2, radius);
+      return;
+    }
+  }
+
+  // Use cached data if available
+  if (cachedWeatherData && cachedWeatherIcon) {
+    renderWeather(ctx, cachedWeatherData, cachedWeatherIcon, centerX, radius, iconSize);
+  }
+}
 
 function drawHand(ctx, pos, length, width) {
   ctx.beginPath();
@@ -208,5 +255,5 @@ function drawHand(ctx, pos, length, width) {
   ctx.rotate(-pos);
 }
 
-drawClock();
+await drawClock();
 setInterval(drawClock, 1000);
