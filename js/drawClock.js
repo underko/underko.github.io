@@ -201,7 +201,7 @@ function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
   var rainMm = data.daily.rain_sum[0];
   var snowCm = data.daily.snowfall_sum[0];
 
-  ctx.drawImage(iconImg, centerX - (iconSize / 2), radius - 100, iconSize, iconSize);
+  ctx.drawImage(iconImg, centerX - (iconSize / 2), radius - 115, iconSize, iconSize);
   ctx.fillStyle = "black";
   ctx.font = radius * 0.1 + "px Arial";
   ctx.textAlign = "center";
