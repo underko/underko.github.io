@@ -1,121 +1,129 @@
-// Rewritten to support iOS 12 (Safari 12): ES5 only, no async/await, fetch polyfill needed.
+// ES5-compatible clock + weather widget
+// Supports iOS 12 Safari (fetch polyfill required)
 
-var clock = document.getElementById("clock");
-clock.height = window.innerHeight * 0.8;
-clock.width = window.innerWidth;
-var ctx = clock.getContext("2d");
-var radius = clock.height / 2 * 0.90;
-
-var translateX = window.innerWidth / 2;
-var translateY = clock.height / 2;
-
-ctx.font = radius * 0.15 + "px arial";
-ctx.textBaseline = "middle";
-ctx.textAlign = "center";
-
+var clock, ctx, radius;
 var lastFetchQuarter = null;
 var cachedWeatherData = null;
 var cachedWeatherIcon = null;
 var wmoCodes = null;
 
-function Clean() {
-  ctx.fillStyle = 'antiquewhite';
+// ----------------- Initialization -----------------
+function initClockCanvas() {
+  clock = document.getElementById("clock");
+  resizeClockCanvas();
+  ctx = clock.getContext("2d");
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  drawClock();
+  setInterval(drawClock, 1000);
+  window.addEventListener("resize", resizeClockCanvas);
+}
+
+function resizeClockCanvas() {
+  clock.height = window.innerHeight * 0.8;
+  clock.width = window.innerWidth;
+  radius = (clock.height / 2) * 0.90;
+}
+
+// ----------------- Main Draw -----------------
+function drawClock() {
+  clearCanvas();
+  renderDigital();
+  renderWeather();
+  renderDate();
+  renderWeekDays();
+
+  ctx.save();
+  ctx.translate(clock.width / 2, clock.height / 2);
+  drawFace();
+  drawNumbers();
+  drawTime();
+  ctx.restore();
+}
+
+function clearCanvas() {
+  ctx.fillStyle = "antiquewhite";
   ctx.fillRect(0, 0, clock.width, clock.height);
 }
 
-function drawClock() {
-  Clean();
-  drawDigital(ctx);
-  drawWeatherWidget(ctx);
-  drawDate(ctx);
-  drawWeekDays(ctx);
-  ctx.translate(translateX, translateY);
-  drawFace(ctx, radius);
-  drawNumbers(ctx, radius);
-  drawTime(ctx, radius);
-  ctx.translate(-translateX, -translateY);
-}
-
-function drawWeekDays(ctx) {
+// ----------------- Widgets -----------------
+function renderWeekDays() {
   var date = new Date();
-  var daysSvk = ["PONDELOK", "UTOROK", "STREDA", "ŠTVRTOK", "PIATOK", "SOBOTA", "NEDELA"];
-  var daysFin = ["MAANANTAI", "TIISTAI", "KESKIVIIKKO", "TORSTAI", "PERJANTAI", "LAUANTAI", "SUNNUNTAI"];
-  var daysColors = ["green", "blue", "white", "brown", "yellow", "pink", "red"];
+  var daysSvk = ["PONDELOK","UTOROK","STREDA","ŠTVRTOK","PIATOK","SOBOTA","NEDELA"];
+  var daysFin = ["MAANANTAI","TIISTAI","KESKIVIIKKO","TORSTAI","PERJANTAI","LAUANTAI","SUNNUNTAI"];
+  var daysColors = ["green","blue","white","brown","yellow","pink","red"];
 
-  ctx.font = radius * 0.1 + "px arial";
+  ctx.font = (radius * 0.1) + "px arial";
   ctx.textAlign = "left";
 
-  for (var index = 0; index < daysSvk.length; index++) {
-    if ((date.getDay() || 7) == index + 1) {
+  for (var i = 0; i < 7; i++) {
+    var y = window.innerHeight * 0.1 + i * 80;
+    var isToday = ((date.getDay() || 7) === i + 1);
+
+    if (isToday) {
       ctx.fillStyle = "black";
-      ctx.fillRect(clock.width - 205, window.innerHeight * 0.1 + index * 80 - 30, 200, 85);
+      ctx.fillRect(clock.width - 205, y - 30, 200, 85);
       ctx.fillStyle = "antiquewhite";
-      ctx.fillRect(clock.width - 203, window.innerHeight * 0.1 + index * 80 - 28, 196, 81);
+      ctx.fillRect(clock.width - 203, y - 28, 196, 81);
     }
-    ctx.fillStyle = daysColors[index];
-    ctx.fillText(daysSvk[index], clock.width - 200, window.innerHeight * 0.1 + index * 80);
-    ctx.fillText(daysFin[index], clock.width - 200, window.innerHeight * 0.1 + index * 80 + 30);
+
+    ctx.fillStyle = daysColors[i];
+    ctx.fillText(daysSvk[i], clock.width - 200, y);
+    ctx.fillText(daysFin[i], clock.width - 200, y + 30);
   }
 }
 
-function drawDigital(ctx) {
+function renderDigital() {
   var date = new Date();
-  var h = date.getHours();
-  var m = date.getMinutes();
-
-  h = (h < 10) ? "0" + h : h;
-  m = (m < 10) ? "0" + m : m;
-
+  var h = pad2(date.getHours());
+  var m = pad2(date.getMinutes());
   var time = h + ":" + m;
 
   ctx.fillStyle = "black";
-  ctx.font = radius * 0.4 + "px arial";
+  ctx.font = (radius * 0.4) + "px arial";
   ctx.textAlign = "center";
   ctx.fillText(time, radius / 2, radius / 3);
 }
 
-function drawDate(ctx) {
+function renderDate() {
   var dateObj = new Date();
-  var m = dateObj.getMonth() + 1;
-  var d = dateObj.getDate();
-
-  d = (d < 10) ? "0" + d : d;
-  m = (m < 10) ? "0" + m : m;
-
-  var date = d + "." + m + ".";
+  var d = pad2(dateObj.getDate());
+  var m = pad2(dateObj.getMonth() + 1);
+  var dateStr = d + "." + m + ".";
 
   ctx.fillStyle = "black";
-  ctx.font = radius * 0.4 + "px arial";
+  ctx.font = (radius * 0.4) + "px arial";
   ctx.textAlign = "center";
-  ctx.fillText(date, radius / 2 + 20, window.innerHeight - radius * 0.8);
+  ctx.fillText(dateStr, radius / 2 + 20, clock.height - radius * 0.2);
 }
 
-function drawFace(ctx, radius) {
-  var grad;
+// ----------------- Analog Clock -----------------
+function drawFace() {
   ctx.beginPath();
   ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-  ctx.fillStyle = 'white';
+  ctx.fillStyle = "white";
   ctx.fill();
-  grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
-  grad.addColorStop(0, '#333');
-  grad.addColorStop(1, '#333');
+
+  var grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
+  grad.addColorStop(0, "#333");
+  grad.addColorStop(1, "#333");
   ctx.strokeStyle = grad;
   ctx.lineWidth = radius * 0.05;
   ctx.stroke();
+
   ctx.beginPath();
   ctx.arc(0, 0, radius * 0.05, 0, 2 * Math.PI);
-  ctx.fillStyle = '#333';
+  ctx.fillStyle = "#333";
   ctx.fill();
 }
 
-function drawNumbers(ctx, radius) {
-  var ang, num;
+function drawNumbers() {
   ctx.fillStyle = "black";
-  ctx.font = radius * 0.15 + "px arial";
+  ctx.font = (radius * 0.15) + "px arial";
   ctx.textAlign = "center";
 
-  for (num = 1; num < 13; num++) {
-    ang = num * Math.PI / 6;
+  for (var num = 1; num <= 12; num++) {
+    var ang = num * Math.PI / 6;
     ctx.rotate(ang);
     ctx.translate(0, -radius * 0.85);
     ctx.rotate(-ang);
@@ -126,30 +134,43 @@ function drawNumbers(ctx, radius) {
   }
 }
 
-function drawTime(ctx, radius) {
+function drawTime() {
   var now = new Date();
-  var hour = now.getHours();
+  var hour = now.getHours() % 12;
   var minute = now.getMinutes();
   var second = now.getSeconds();
 
-  hour = hour % 12;
-  hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
-  drawHand(ctx, hour, radius * 0.5, radius * 0.07);
+  var hourPos = (hour * Math.PI / 6) +
+                (minute * Math.PI / (6 * 60)) +
+                (second * Math.PI / (360 * 60));
+  var minutePos = (minute * Math.PI / 30) +
+                  (second * Math.PI / (30 * 60));
+  var secondPos = second * Math.PI / 30;
 
-  minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
-  drawHand(ctx, minute, radius * 0.7, radius * 0.07);
-
-  second = (second * Math.PI / 30);
-  drawHand(ctx, second, radius * 0.9, radius * 0.02);
+  drawHand(hourPos, radius * 0.5, radius * 0.07);
+  drawHand(minutePos, radius * 0.7, radius * 0.07);
+  drawHand(secondPos, radius * 0.9, radius * 0.02);
 }
 
-function drawWeatherWidget(ctx) {
+function drawHand(pos, length, width) {
+  ctx.beginPath();
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.moveTo(0, 0);
+  ctx.rotate(pos);
+  ctx.lineTo(0, -length);
+  ctx.stroke();
+  ctx.rotate(-pos);
+}
+
+// ----------------- Weather -----------------
+function renderWeather() {
   var centerX = radius / 3 + 20;
   var iconSize = 128;
 
   if (!wmoCodes) {
     loadWmoCodes(function () {
-      drawWeatherWidget(ctx);
+      renderWeather();
     });
     return;
   }
@@ -174,13 +195,12 @@ function drawWeatherWidget(ctx) {
           cachedWeatherData = data;
           cachedWeatherIcon = iconImg;
           lastFetchQuarter = fetchKey;
-          renderWeather(ctx, data, iconImg, centerX, radius, iconSize);
+          drawWeatherData(data, iconImg, centerX, iconSize);
         };
       })
-      .catch(function (error) {
-        console.log("Weather fetch failed:", error);
+      .catch(function () {
         ctx.fillStyle = "red";
-        ctx.font = radius * 0.1 + "px Arial";
+        ctx.font = (radius * 0.1) + "px Arial";
         ctx.textAlign = "center";
         ctx.fillText("Weather load error", radius / 2, radius);
       });
@@ -188,22 +208,22 @@ function drawWeatherWidget(ctx) {
   }
 
   if (cachedWeatherData && cachedWeatherIcon) {
-    renderWeather(ctx, cachedWeatherData, cachedWeatherIcon, centerX, radius, iconSize);
+    drawWeatherData(cachedWeatherData, cachedWeatherIcon, centerX, iconSize);
   }
 }
 
-function renderWeather(ctx, data, iconImg, centerX, radius, iconSize) {
+function drawWeatherData(data, iconImg, centerX, iconSize) {
   var temp = data.current.temperature_2m;
   var lowTemp = data.daily.temperature_2m_min[0];
   var highTemp = data.daily.temperature_2m_max[0];
   var uvIndex = data.daily.uv_index_max[0];
-  var aqi = 0;
+  var aqi = 0; // placeholder
   var rainMm = data.daily.rain_sum[0];
   var snowCm = data.daily.snowfall_sum[0];
 
-  ctx.drawImage(iconImg, centerX - (iconSize / 2), radius - 115, iconSize, iconSize);
+  ctx.drawImage(iconImg, centerX - iconSize / 2, radius - 115, iconSize, iconSize);
   ctx.fillStyle = "black";
-  ctx.font = radius * 0.1 + "px Arial";
+  ctx.font = (radius * 0.1) + "px Arial";
   ctx.textAlign = "center";
 
   ctx.fillText(temp.toFixed(1) + "°C (" + lowTemp.toFixed(1) + "-" + highTemp.toFixed(1) + ")", centerX, radius);
@@ -218,22 +238,13 @@ function loadWmoCodes(callback) {
     .then(function (json) {
       wmoCodes = json;
       if (callback) callback();
-    })
-    .catch(function (err) {
-      console.log("Failed to load wmo_codes.json", err);
     });
 }
 
-function drawHand(ctx, pos, length, width) {
-  ctx.beginPath();
-  ctx.lineWidth = width;
-  ctx.lineCap = "round";
-  ctx.moveTo(0, 0);
-  ctx.rotate(pos);
-  ctx.lineTo(0, -length);
-  ctx.stroke();
-  ctx.rotate(-pos);
+// ----------------- Helpers -----------------
+function pad2(n) {
+  return (n < 10 ? "0" : "") + n;
 }
 
-drawClock();
-setInterval(drawClock, 1000);
+// ----------------- Start -----------------
+initClockCanvas();
