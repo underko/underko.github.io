@@ -1,13 +1,9 @@
-// ES5-compatible clock + weather widget
-// Supports iOS 12 Safari (fetch polyfill required)
-
 var clock, ctx, radius;
 var lastFetchQuarter = null;
 var cachedWeatherData = null;
 var cachedWeatherIcon = null;
 var wmoCodes = null;
 
-// ----------------- Initialization -----------------
 function initClockCanvas() {
   clock = document.getElementById("clock");
   resizeClockCanvas();
@@ -25,7 +21,6 @@ function resizeClockCanvas() {
   radius = (clock.height / 2) * 0.90;
 }
 
-// ----------------- Main Draw -----------------
 function drawClock() {
   clearCanvas();
   renderDigital();
@@ -46,7 +41,6 @@ function clearCanvas() {
   ctx.fillRect(0, 0, clock.width, clock.height);
 }
 
-// ----------------- Widgets -----------------
 function renderWeekDays() {
   var date = new Date();
   var daysSvk = ["PONDELOK","UTOROK","STREDA","ŠTVRTOK","PIATOK","SOBOTA","NEDELA"];
@@ -163,7 +157,6 @@ function drawHand(pos, length, width) {
   ctx.rotate(-pos);
 }
 
-// ----------------- Weather -----------------
 function renderWeather() {
   var centerX = radius / 3 + 20;
   var iconSize = 128;
@@ -182,9 +175,11 @@ function renderWeather() {
   var isDay = (currentHour >= 8 && currentHour < 20) ? "day" : "night";
 
   if (fetchKey !== lastFetchQuarter) {
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=60.4859&longitude=22.1689&daily=temperature_2m_max,uv_index_max,snowfall_sum,rain_sum,weather_code,showers_sum,precipitation_probability_max,precipitation_sum,precipitation_hours,shortwave_radiation_sum,temperature_2m_min&current=temperature_2m,weather_code&forecast_days=1")
-      .then(function (response) { return response.json(); })
-      .then(function (data) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://api.open-meteo.com/v1/forecast?latitude=60.4859&longitude=22.1689&daily=temperature_2m_max,uv_index_max,snowfall_sum,rain_sum,weather_code,showers_sum,precipitation_probability_max,precipitation_sum,precipitation_hours,shortwave_radiation_sum,temperature_2m_min&current=temperature_2m,weather_code&forecast_days=1", true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var data = JSON.parse(xhr.responseText);
         var weatherCode = data.current.weather_code.toString();
         var wmoEntry = wmoCodes[weatherCode] && wmoCodes[weatherCode][isDay];
         if (!wmoEntry) return;
@@ -197,13 +192,14 @@ function renderWeather() {
           lastFetchQuarter = fetchKey;
           drawWeatherData(data, iconImg, centerX, iconSize);
         };
-      })
-      .catch(function () {
+      } else if (xhr.readyState === 4) {
         ctx.fillStyle = "red";
         ctx.font = (radius * 0.1) + "px Arial";
         ctx.textAlign = "center";
         ctx.fillText("Weather load error", radius / 2, radius);
-      });
+      }
+    };
+    xhr.send();
     return;
   }
 
@@ -217,7 +213,6 @@ function drawWeatherData(data, iconImg, centerX, iconSize) {
   var lowTemp = data.daily.temperature_2m_min[0];
   var highTemp = data.daily.temperature_2m_max[0];
   var uvIndex = data.daily.uv_index_max[0];
-  var aqi = 0; // placeholder
   var rainMm = data.daily.rain_sum[0];
   var snowCm = data.daily.snowfall_sum[0];
 
@@ -226,25 +221,26 @@ function drawWeatherData(data, iconImg, centerX, iconSize) {
   ctx.font = (radius * 0.1) + "px Arial";
   ctx.textAlign = "center";
 
-  ctx.fillText(temp.toFixed(1) + "°C (" + lowTemp.toFixed(1) + "-" + highTemp.toFixed(1) + ")", centerX, radius);
-  ctx.fillText("\ud83c\udf27 " + rainMm + "mm, \u2744 " + snowCm + "cm", centerX, radius + 35);
-  ctx.fillText("\ud83d\ude0e: " + uvIndex, centerX, radius + 70);
-  ctx.fillText("\ud83c\udf43: " + aqi, centerX, radius + 105);
+  ctx.fillText(temp.toFixed(1) + "°C", centerX, radius + 30);
+  ctx.fillText(lowTemp.toFixed(1) + "°C - " + highTemp.toFixed(1) + "°C", centerX, radius + 70);
+  ctx.fillText("\ud83c\udf27 " + rainMm + "mm, \u2744 " + snowCm + "cm", centerX, radius + 110);
+  ctx.fillText("\ud83d\ude0e: " + uvIndex, centerX, radius + 150);
 }
 
 function loadWmoCodes(callback) {
-  fetch("https://underko.github.io/js/wmo_codes.json")
-    .then(function (response) { return response.json(); })
-    .then(function (json) {
-      wmoCodes = json;
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://underko.github.io/js/wmo_codes.json", true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      wmoCodes = JSON.parse(xhr.responseText);
       if (callback) callback();
-    });
+    }
+  };
+  xhr.send();
 }
 
-// ----------------- Helpers -----------------
 function pad2(n) {
   return (n < 10 ? "0" : "") + n;
 }
 
-// ----------------- Start -----------------
 initClockCanvas();
